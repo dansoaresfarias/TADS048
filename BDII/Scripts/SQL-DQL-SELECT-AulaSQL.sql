@@ -138,6 +138,43 @@ select f.nome "Funcionário", f.cpf "CPF do Funcionário",
 	from ocorrenciaInterna oi
 		inner join funcionario f on f.cpf = oi.funcionario_cpf
 			order by oi.dataHora desc, f.nome;
+            
+select f.nome "Funcionário", f.cpf "CPF do Funcionário", 
+	date_format(oi.datahora, '%h:%i - %d/%m/%Y') "Momento da Ocorrência", 
+    upper(oi.gravidade) "Gravidade da Ocorrência", 
+    oi.descricao "Descrição"
+	from ocorrenciaInterna oi
+		inner join funcionario f on f.cpf = oi.funcionario_cpf
+			order by oi.gravidade, oi.dataHora;
+
+select f.nome "Funcionário", f.cpf "CPF do Funcionário", 
+	date_format(oi.datahora, '%h:%i - %d/%m/%Y') "Momento da Ocorrência", 
+    upper(oi.gravidade) "Gravidade da Ocorrência", 
+    oi.descricao "Descrição"
+	from ocorrenciaInterna oi
+		inner join funcionario f on f.cpf = oi.funcionario_cpf
+			where oi.gravidade like "Alta"
+union
+select f.nome "Funcionário", f.cpf "CPF do Funcionário", 
+	date_format(oi.datahora, '%h:%i - %d/%m/%Y') "Momento da Ocorrência", 
+    upper(oi.gravidade) "Gravidade da Ocorrência", 
+    oi.descricao "Descrição"
+	from ocorrenciaInterna oi
+		inner join funcionario f on f.cpf = oi.funcionario_cpf
+			where oi.gravidade like "Média"
+union
+select f.nome "Funcionário", f.cpf "CPF do Funcionário", 
+	date_format(oi.datahora, '%h:%i - %d/%m/%Y') "Momento da Ocorrência", 
+    upper(oi.gravidade) "Gravidade da Ocorrência", 
+    oi.descricao "Descrição"
+	from ocorrenciaInterna oi
+		inner join funcionario f on f.cpf = oi.funcionario_cpf
+			where oi.gravidade like "Baixa";
+
+
+
+
+
 
 
 
