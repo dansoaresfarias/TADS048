@@ -171,8 +171,15 @@ select f.nome "Funcionário", f.cpf "CPF do Funcionário",
 		inner join funcionario f on f.cpf = oi.funcionario_cpf
 			where oi.gravidade like "Baixa";
 
-
-
+-- root teste test aluno
+-- data, tipo, justificativa, cpf, nome
+select date_format(rp.datahora, '%d/%m/%Y - %H:%i') "Data e Hora", 
+	upper(rp.tipoes) "ENTRADA / SAÍDA", 
+    coalesce(rp.justificativa,  '--') "Justificativa", 
+    f.CPF "CPF do Funcionário", f.nome "Funcionário"
+	from registroponto rp
+		inner join funcionario f on rp.Funcionario_CPF = f.cpf
+			order by f.nome, rp.dataHora desc;
 
 
 
