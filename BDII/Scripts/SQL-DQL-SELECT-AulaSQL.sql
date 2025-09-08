@@ -69,6 +69,8 @@ select cpf "CPF do Dependente",
 				timestampdiff(year, dataNasc, now()) <= 6
 				order by nome;            
             
+-- https://dev.mysql.com/doc/refman/8.4/en/date-and-time-functions.html#function_date-format
+-- https://dev.mysql.com/doc/refman/8.4/en/string-functions.html#function_format
 select dep.cpf "CPF do Dependente", 
 	ucase(dep.nome) "Dependente", 
     date_format(dep.dataNasc, '%d/%m/%Y') "Data de Nascimento",
@@ -95,6 +97,49 @@ select dep.cpf "CPF do Dependente",
 					timestampdiff(year, dep.dataNasc, now()) <= 6                
 						order by dep.nome;
                 
+-- CPF, Nome, Idade, Genero, Estado Civil, Salario, Cidade, Telefones, Email
+select upper(func.nome) "Funcionário", func.CPF "CPF",
+	timestampdiff(year, func.dataNasc, now()) "Idade",
+    func.genero "Gênero", func.estadoCivil "Estado Civil",
+    format(func.salario, 2, 'de_DE') "Salário (R$)",
+    ende.cidade "Cidade",
+    tel.numero "Telefone",
+    func.email "E-mail"
+	from funcionario func
+		inner join endereco ende on ende.funcionario_CPF = func.cpf
+        left join telefone tel on tel.funcionario_cpf = func.cpf
+			order by func.nome;
+
+-- https://dev.mysql.com/doc/refman/8.0/en/aggregate-functions.html#function_group-concat
+select upper(f.nome) "Funcionário", f.CPF "CPF",
+	timestampdiff(year, f.dataNasc, now()) "Idade",
+    f.genero "Gênero", f.estadoCivil "Estado Civil",
+    format(f.salario, 2, 'de_DE') "Salário (R$)",
+    e.cidade "Cidade",
+    group_concat(distinct t.numero separator ', ') "Telefones",
+    f.email "E-mail"
+	from funcionario f
+		inner join endereco e on e.funcionario_CPF = f.cpf
+        inner join telefone t on t.funcionario_cpf = f.cpf
+			group by f.cpf
+				order by f.nome;
+
+-- cpf, nome, data, gravidade, descricao
+select f.nome, f.cpf, oi.datahora, oi.gravidade, oi.descricao
+	from ocorrenciaInterna oi
+		inner join funcionario f on f.cpf = oi.funcionario_cpf
+			order by oi.gravidade, f.nome;
+
+-- https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_date-format
+select f.nome "Funcionário", f.cpf "CPF do Funcionário", 
+	date_format(oi.datahora, '%h:%i - %d/%m/%Y') "Momento da Ocorrência", 
+    upper(oi.gravidade) "Gravidade da Ocorrência", 
+    oi.descricao "Descrição"
+	from ocorrenciaInterna oi
+		inner join funcionario f on f.cpf = oi.funcionario_cpf
+			order by oi.dataHora desc, f.nome;
+
+
 
 
 
