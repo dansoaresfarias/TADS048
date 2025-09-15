@@ -184,13 +184,14 @@ select date_format(rp.datahora, '%d/%m/%Y - %H:%i') "Data e Hora",
 -- anoRef, nomeFunc, datainicio, dataFim, qtdDias, valor, status
 select fer.anoRef "Ano Referência", func.nome "Funcionário", 
 	date_format(fer.dataInicio, '%d/%m/%Y') "Data de Início",
-    date_add(fer.dataInicio, interval fer.qtdDias day) "Data Fim",
+    date_format(date_add(fer.dataInicio, interval fer.qtdDias day),
+    '%d/%m/%Y') "Data Fim",
     fer.qtdDias "Quantidade de Dias", 
-    format(fer.valor, 2, 'de_DE') "Pagamento",
-    fer.`status` "Situação"
+    concat('R$ ', format(fer.valor, 2, 'de_DE')) "Pagamento",
+    upper(fer.`status`) "Situação"
 	from ferias fer
 		inner join funcionario func on func.cpf = fer.funcionario_cpf
-			order by fer.anoRef desc;
+			order by fer.anoRef desc, fer.dataInicio desc;
 
 
 
