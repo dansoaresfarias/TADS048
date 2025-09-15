@@ -212,7 +212,53 @@ select func.nome "Funcionário", func.cpf "CPF",
 				group by func.cpf
 					order by func.genero, func.nome;
 
+select func.nome "Funcionário", func.cpf "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    count(dep.cpf) "Quantidade Dependentes"
+		from funcionario func
+        left join dependente dep on dep.funcionario_cpf = func.cpf
+			group by func.cpf
+				order by func.nome;
 
+select func.nome "Funcionário", func.cpf "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    count(dep.cpf) "Quantidade Dependentes"
+		from funcionario func
+        inner join dependente dep on dep.funcionario_cpf = func.cpf
+			group by func.cpf
+				order by func.nome;
+
+select func.nome "Funcionário", func.cpf "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    count(fer.idFerias) "Quantidade de Vezes Tirou Férias?",
+    sum(fer.qtdDias) "Total de Dias já Gozados",
+    sum(fer.qtdDias) / count(fer.idFerias) "Média de Dias por Férias"
+		from funcionario func
+		inner join ferias fer on fer.funcionario_cpf = func.cpf
+			group by func.cpf
+				order by func.nome;
+
+select `status` "Situação" , count(idFerias) "Quantidade"
+	from ferias
+		group by `status`;
+
+select gravidade "Gravidade", count(idOcorrenciaInterna) "Quantidade"
+	from OcorrenciaInterna
+		group by gravidade
+			order by count(idOcorrenciaInterna) desc;
+
+select func.nome "Funcionário", func.cpf "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    count(oi.idocorrenciaInterna) "Quantidade de Ocorrências Internas"
+		from funcionario func
+			left join OcorrenciaInterna oi on oi.funcionario_cpf = func.cpf
+				where oi.gravidade = "Alta"
+					group by func.cpf
+						order by func.nome;
 
 
 
