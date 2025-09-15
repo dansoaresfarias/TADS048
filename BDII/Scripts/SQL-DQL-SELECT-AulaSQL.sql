@@ -260,9 +260,26 @@ select func.nome "Funcionário", func.cpf "CPF",
 					group by func.cpf
 						order by func.nome;
 
+select func.nome "Funcionário", func.cpf "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    crg.nome "Cargo"
+		from funcionario func
+        inner join trabalhar trb on trb.funcionario_cpf = func.cpf
+        inner join cargo crg on trb.cargo_cbo = crg.cbo
+			where trb.dataFim is null
+				order by func.nome;
 
-
-
+select func.nome "Funcionário", func.cpf "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    crg.nome "Cargo", dep.nome "Departamento"
+		from funcionario func
+        inner join trabalhar trb on trb.funcionario_cpf = func.cpf
+        inner join cargo crg on trb.cargo_cbo = crg.cbo
+        inner join departamento dep on trb.Departamento_idDepartamento = dep.idDepartamento
+			where trb.dataFim is null
+				order by func.nome;
 
 
 
