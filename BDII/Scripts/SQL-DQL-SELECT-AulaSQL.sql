@@ -193,7 +193,24 @@ select fer.anoRef "Ano Referência", func.nome "Funcionário",
 		inner join funcionario func on func.cpf = fer.funcionario_cpf
 			order by fer.anoRef desc, fer.dataInicio desc;
 
-
+-- Relatório dos Funcionários
+-- Nome do Funcionário; CPF; Carteira de Trabalho; E-mail;
+-- Telefonestelefone (8199998888 | 81 98787878787); Gênero;
+-- Estado Civil (Letras Maiscula); Idade; Carga Horária (40h) Salário (R$ 3.000,70)
+-- Apenas os funcionario de Recife -- Ordenado pelo Genero e Nome do Funcionario
+select func.nome "Funcionário", func.cpf "CPF", 
+	func.carteiraTrab "Carteira de Trabalho", func.email "Email",
+    group_concat(distinct tel.numero separator ' | ') "Telefones",
+    func.genero "Gênero", upper(func.estadoCivil) "Estado Civil",
+    timestampdiff(year, func.dataNasc, now()) "Idade", 
+    concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário"
+	from funcionario func
+		inner join telefone tel on tel.funcionario_cpf = func.cpf
+        inner join endereco ende on ende.funcionario_cpf = func.cpf
+			where ende.cidade = "Recife"
+				group by func.cpf
+					order by func.genero, func.nome;
 
 
 
