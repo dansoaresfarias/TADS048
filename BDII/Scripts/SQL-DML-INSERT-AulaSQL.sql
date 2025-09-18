@@ -834,6 +834,15 @@ INSERT INTO uh (nome, valor, local, qtdPessoas, TipoUH_idTipoUH) VALUES
 ('Bangalô 803', 880.00, 'Praia', 3, 8),
 ('Bangalô 804', 900.00, 'Praia', 4, 8);
 
+SET SQL_SAFE_UPDATES = 0;
+
+update funcionario
+	set salario = salario * 1.25
+		where genero = "Feminino";
+
+
+
+
 
 
 
