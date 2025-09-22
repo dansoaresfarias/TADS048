@@ -398,3 +398,42 @@ create view RelatorioRHPag as
 				order by func.nome;
                 
 select * from relatoriorhpag;
+
+select cpf "CPF", upper(nome) as "Funcionário", 
+	date_format(datanasc, "%d/%m/%Y") "Data de Nascimento", 
+    genero "Gênero", upper(estadocivil) "Estado Civil",	
+    chavePix "PIX", carteiratrab "Carteira de Trabalho", 
+    concat(cargahoraria, "h") "Carga Horária", email "E-mail", 
+    concat("R$ ", format(salario, 2, 'de_DE')) "Salário"
+		from funcionario
+			where salario <= (select avg(salario) from funcionario)
+				order by nome;
+                
+select dep.nome "Departamento", 
+	concat("R$ ", format(sum(func.salario), 2, 'de_DE')) "Custo Salarial"
+	from departamento dep
+		left join trabalhar trb on trb.Departamento_idDepartamento = dep.idDepartamento
+        inner join funcionario func on func.CPF = trb.Funcionario_CPF
+			group by dep.idDepartamento
+				order by sum(func.salario) desc;
+
+select dep.nome "Departamento", 
+	concat("R$ ", format(sum(func.salario), 2, 'de_DE')) "Custo Salarial",
+    "Quantidade de Fucionário",
+    "Média Salarial"
+	from departamento dep
+		left join trabalhar trb on trb.Departamento_idDepartamento = dep.idDepartamento
+        inner join funcionario func on func.CPF = trb.Funcionario_CPF
+			group by dep.idDepartamento
+				order by sum(func.salario) desc;
+
+
+
+
+
+
+
+
+
+
+
