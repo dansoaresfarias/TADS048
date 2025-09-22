@@ -280,9 +280,28 @@ select func.nome "Funcionário", func.cpf "CPF",
         inner join departamento dep on trb.Departamento_idDepartamento = dep.idDepartamento
 			where trb.dataFim is null
 				order by func.nome;
+                
+update funcionario
+	set salario = 5000, fg = 1000
+		where cpf like "108.801.888-11";
+
 
 -- nome upper, cpf, cargahorario, salario, cargo, departamento, gerente 
-
+select upper(func.nome) "Funcionário",
+	replace(replace(func.cpf, ".", ""), "-", "") "CPF",
+    concat(func.cargaHoraria, "h") "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    crg.nome "Cargo",
+    dep.nome "Departamento",
+    grt.nome "Gerente"
+	from funcionario func
+		inner join trabalhar trb on trb.Funcionario_CPF = func.CPF
+        inner join cargo crg on crg.CBO = trb.Cargo_CBO
+        inner join departamento dep on dep.idDepartamento = trb.Departamento_idDepartamento
+        left join funcionario grt on grt.cpf = dep.Gerente_CPF
+			where trb.dataFim is null
+				order by func.nome;
+    
 
 
 
