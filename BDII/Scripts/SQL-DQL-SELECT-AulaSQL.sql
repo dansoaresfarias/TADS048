@@ -281,6 +281,20 @@ select func.nome "Funcionário", func.cpf "CPF",
 			where trb.dataFim is null
 				order by func.nome;
 
+-- nome upper, cpf, cargahorario, salario, cargo, departamento, gerente 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
