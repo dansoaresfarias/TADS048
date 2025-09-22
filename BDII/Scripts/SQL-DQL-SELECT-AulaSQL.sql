@@ -419,8 +419,8 @@ select dep.nome "Departamento",
 
 select dep.nome "Departamento", 
 	concat("R$ ", format(sum(func.salario), 2, 'de_DE')) "Custo Salarial",
-    "Quantidade de Fucionário",
-    "Média Salarial"
+    count(func.cpf) "Quantidade de Fucionário",
+    concat("R$ ", format(avg(func.salario), 2, 'de_DE')) "Média Salarial"
 	from departamento dep
 		left join trabalhar trb on trb.Departamento_idDepartamento = dep.idDepartamento
         inner join funcionario func on func.CPF = trb.Funcionario_CPF
