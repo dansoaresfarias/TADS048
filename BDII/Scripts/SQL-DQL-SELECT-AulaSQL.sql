@@ -302,11 +302,39 @@ select upper(func.nome) "Funcionário",
 			where trb.dataFim is null
 				order by func.nome;
     
+select upper(func.nome) "Funcionário",
+	replace(replace(func.cpf, ".", ""), "-", "") "CPF",
+    concat(func.cargaHoraria, "h") "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    crg.nome "Cargo",
+    dep.nome "Departamento",
+    grt.nome "Gerente"
+	from funcionario func
+		inner join trabalhar trb on trb.Funcionario_CPF = func.CPF
+        inner join cargo crg on crg.CBO = trb.Cargo_CBO
+        inner join departamento dep on dep.idDepartamento = trb.Departamento_idDepartamento
+        left join funcionario grt on grt.cpf = dep.Gerente_CPF
+			where trb.dataFim is null and
+				func.salario >= avg(func.salario)
+				order by func.nome;
 
+select avg(salario) from funcionario;
 
-
-
-
+select upper(func.nome) "Funcionário",
+	replace(replace(func.cpf, ".", ""), "-", "") "CPF",
+    concat(func.cargaHoraria, "h") "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    crg.nome "Cargo",
+    dep.nome "Departamento",
+    grt.nome "Gerente"
+	from funcionario func
+		inner join trabalhar trb on trb.Funcionario_CPF = func.CPF
+        inner join cargo crg on crg.CBO = trb.Cargo_CBO
+        inner join departamento dep on dep.idDepartamento = trb.Departamento_idDepartamento
+        left join funcionario grt on grt.cpf = dep.Gerente_CPF
+			where trb.dataFim is null and
+				func.salario >= (select avg(salario) from funcionario)
+				order by func.nome;
 
 
 
