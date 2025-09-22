@@ -336,7 +336,21 @@ select upper(func.nome) "Funcionário",
 				func.salario >= (select avg(salario) from funcionario)
 				order by func.nome;
 
-
+-- aux creche 180 para cada filho com menos de 7
+select func.nome "Funcionário", 
+	replace(replace(func.cpf, ".", ""), "-", "") "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    count(dpt.CPF) "Auxílio Creche",
+    crg.nome "Cargo", dep.nome "Departamento"
+		from funcionario func
+        inner join trabalhar trb on trb.funcionario_cpf = func.cpf
+        inner join cargo crg on trb.cargo_cbo = crg.cbo
+        inner join departamento dep on trb.Departamento_idDepartamento = dep.idDepartamento
+        left join dependente dpt on dpt.Funcionario_CPF = func.cpf
+			where trb.dataFim is null
+				group by func.CPF
+					order by func.nome;
 
 
 
