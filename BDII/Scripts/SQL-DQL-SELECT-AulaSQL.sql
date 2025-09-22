@@ -352,10 +352,49 @@ select func.nome "Funcionário",
 				group by func.CPF
 					order by func.nome;
 
+-- Resolvendo com View
+select func.cpf "cpf", count(dep.CPF) "qtdFilho"
+	from funcionario func
+		left join dependente dep on dep.Funcionario_CPF = func.cpf
+			where timestampdiff(year, dep.dataNasc, now()) <= 6 
+				group by func.cpf;
 
+create view depAuxCreche as
+	select func.cpf "cpf", count(dep.CPF) "qtdFilho"
+		from funcionario func
+		left join dependente dep on dep.Funcionario_CPF = func.cpf
+			where timestampdiff(year, dep.dataNasc, now()) <= 6 
+				group by func.cpf;
 
+select * from depauxcreche;
 
+select func.nome "Funcionário", 
+	replace(replace(func.cpf, ".", ""), "-", "") "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    concat("R$ ", format(coalesce(dac.qtdFilho, 0) * 180, 2, 'de_DE')) "Auxílio Creche",
+    crg.nome "Cargo", dep.nome "Departamento"
+		from funcionario func
+        inner join trabalhar trb on trb.funcionario_cpf = func.cpf
+        inner join cargo crg on trb.cargo_cbo = crg.cbo
+        inner join departamento dep on trb.Departamento_idDepartamento = dep.idDepartamento
+        left join depauxcreche dac on dac.cpf = func.cpf
+			where trb.dataFim is null
+				order by func.nome;
 
-
-
-
+create view RelatorioRHPag as
+	select func.nome "Funcionário", 
+	replace(replace(func.cpf, ".", ""), "-", "") "CPF",
+	concat(func.cargaHoraria, 'h') "Carga Horária",
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+    concat("R$ ", format(coalesce(dac.qtdFilho, 0) * 180, 2, 'de_DE')) "Auxílio Creche",
+    crg.nome "Cargo", dep.nome "Departamento"
+		from funcionario func
+        inner join trabalhar trb on trb.funcionario_cpf = func.cpf
+        inner join cargo crg on trb.cargo_cbo = crg.cbo
+        inner join departamento dep on trb.Departamento_idDepartamento = dep.idDepartamento
+        left join depauxcreche dac on dac.cpf = func.cpf
+			where trb.dataFim is null
+				order by func.nome;
+                
+select * from relatoriorhpag;
