@@ -440,18 +440,36 @@ update funcionario,
 	set cargaHoraria = 36
 		where funcionario.cpf = crgFunc.cpf;
 
+-- 180 (<25), 280(25>=  and <35), 380 (35>=  and <45), 480 (45>=  and <55) depois 600
 select func.nome "Funcionário", 
 	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
     concat(func.cargaHoraria, 'h') "Carga Horária",
     crg.nome "Cargo",  
-    case func.cargahoraria when 40 then 22*20
-		when 36 then 22*32 end "Vale Alimentação"
+    case func.cargahoraria when 40 then concat("R$ ", 22*20)
+		when 36 then concat("R$ ", 22*32) end "Vale Alimentação",
+	case when timestampdiff(year, func.dataNasc, now()) < 25 then concat("R$ ", 180)  
+		when timestampdiff(year, func.dataNasc, now()) between 25 and 35 then concat("R$ ", 280) 
+		when timestampdiff(year, func.dataNasc, now()) between 35 and 45 then concat("R$ ", 380)
+        when timestampdiff(year, func.dataNasc, now()) between 45 and 55 then concat("R$ ", 480)
+        else concat("R$ ", 600)
+		end "Auxílio Saúde",
+	concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário"
 	from funcionario func	
 		inner join trabalhar trb on trb.Funcionario_CPF = func.cpf
-		inner join cargo crg on crg.CBO = trb.Cargo_CBO;
+		inner join cargo crg on crg.CBO = trb.Cargo_CBO
+			order by func.nome;
 
-
-
+select func.nome "Funcionário", 
+	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
+	fer.dataInicio "DataInicio",
+    adddate(fer.dataInicio, interval fer.qtdDias day) "DataFim",
+    fer.qtdDias "Quantidade de Dias",
+    fer.anoRef "Ano Referência"    
+    from funcionario func
+	inner join ferias fer on fer.Funcionario_CPF = func.cpf
+		where substr(fer.dataInicio, 6, 2) like "06" or
+			substr(fer.dataInicio, 6, 2) like "07"
+			order by fer.dataInicio;
 
 
 
