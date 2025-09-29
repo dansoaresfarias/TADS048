@@ -440,11 +440,15 @@ update funcionario,
 	set cargaHoraria = 36
 		where funcionario.cpf = crgFunc.cpf;
 
-
 select func.nome "Funcionário", 
 	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
     concat(func.cargaHoraria, 'h') "Carga Horária",
-    crg.nome "Cargo",  "Vale Alimentação"
+    crg.nome "Cargo",  
+    case func.cargahoraria when 40 then 22*20
+		when 36 then 22*32 end "Vale Alimentação"
+	from funcionario func	
+		inner join trabalhar trb on trb.Funcionario_CPF = func.cpf
+		inner join cargo crg on crg.CBO = trb.Cargo_CBO;
 
 
 
