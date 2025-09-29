@@ -427,7 +427,24 @@ select dep.nome "Departamento",
 			group by dep.idDepartamento
 				order by sum(func.salario) desc;
 
+select func.cpf from funcionario func
+	inner join trabalhar trb on trb.Funcionario_CPF = func.cpf
+	inner join cargo crg on crg.CBO = trb.Cargo_CBO
+    where crg.nome like "Segurança%" or crg.nome like "Auxiliar%";
 
+update funcionario, 
+	(select func.cpf from funcionario func
+	inner join trabalhar trb on trb.Funcionario_CPF = func.cpf
+	inner join cargo crg on crg.CBO = trb.Cargo_CBO
+    where crg.nome like "Segurança%" or crg.nome like "Auxiliar%") as crgFunc
+	set cargaHoraria = 36
+		where funcionario.cpf = crgFunc.cpf;
+
+
+select func.nome "Funcionário", 
+	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
+    concat(func.cargaHoraria, 'h') "Carga Horária",
+    crg.nome "Cargo",  "Vale Alimentação"
 
 
 
