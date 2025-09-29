@@ -461,7 +461,7 @@ select func.nome "Funcionário",
 
 select func.nome "Funcionário", 
 	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
-	fer.dataInicio "DataInicio",
+	date_format(fer.dataInicio, '%d/%m/%Y') "DataInicio",
     adddate(fer.dataInicio, interval fer.qtdDias day) "DataFim",
     fer.qtdDias "Quantidade de Dias",
     fer.anoRef "Ano Referência"    
@@ -471,7 +471,16 @@ select func.nome "Funcionário",
 			substr(fer.dataInicio, 6, 2) like "07"
 			order by fer.dataInicio;
 
-
+select dep.nome "Departamento", 
+	concat("R$ ", format(sum(func.salario), 2, 'de_DE')) "Custo Salarial",
+    count(func.cpf) "Quantidade de Fucionário",
+    concat("R$ ", format(avg(func.salario), 2, 'de_DE')) "Média Salarial"
+	from departamento dep
+		left join trabalhar trb on trb.Departamento_idDepartamento = dep.idDepartamento
+        inner join funcionario func on func.CPF = trb.Funcionario_CPF
+			group by dep.idDepartamento
+				having sum(func.salario) >= 10000
+					order by sum(func.salario) desc;
 
 
 
