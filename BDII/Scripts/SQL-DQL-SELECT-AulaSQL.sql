@@ -462,7 +462,7 @@ select func.nome "Funcionário",
 select func.nome "Funcionário", 
 	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
 	date_format(fer.dataInicio, '%d/%m/%Y') "DataInicio",
-    adddate(fer.dataInicio, interval fer.qtdDias day) "DataFim",
+    date_format(adddate(fer.dataInicio, interval fer.qtdDias day), '%d/%m/%Y') "DataFim",
     fer.qtdDias "Quantidade de Dias",
     fer.anoRef "Ano Referência"    
     from funcionario func
