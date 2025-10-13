@@ -516,12 +516,27 @@ create function valeSaude(dn date)
     end $$
 delimiter ;
 
+delimiter $$
+create function auxCreche(cpfFunc varchar(14))
+	returns decimal(6,2) deterministic
+    begin
+		declare qtdFilhos int;
+        select count(cpf) into qtdFilhos
+			from dependente 
+				where Funcionario_CPF = cpfFunc
+					and timestampdiff(year, dataNasc, now()) < 7
+					group by Funcionario_CPF;
+		return qtdFilhos * 180;
+    end $$
+delimiter ;
+
 select func.nome "Funcionário", 
 	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
     concat(func.cargaHoraria, 'h') "Carga Horária",
     crg.nome "Cargo",  
     concat("R$ ", format(valeAlimentacao(func.cargaHoraria), 2, 'de_DE')) "Vale Alimentação",
 	concat("R$ ", format(valeSaude(func.dataNasc), 2, 'de_DE')) "Auxílio Saúde",
+    concat("R$ ", format(coalesce(auxCreche(func.cpf), 0), 2, 'de_DE')) "Auxílio Creche",
 	concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário"
 	from funcionario func	
 		inner join trabalhar trb on trb.Funcionario_CPF = func.cpf
