@@ -547,6 +547,23 @@ create function calcINSS(salario decimal(7,2))
     end $$
 delimiter ;
 
+delimiter $$
+create function calcIRRF(salario decimal(7,2))
+	returns decimal(6,2) deterministic
+    begin
+		if(salario <= 2259.20) 
+			then return 0;
+		elseif(salario between 2259.20 and 2826.65)
+			then return salario * 0.75;
+		elseif(salario between 2826.65 and 3751.05)
+			then return salario * 0.15;
+		elseif(salario between 3751.05 and 4664.68)
+			then return salario * 0.225;
+		else return salario * 0.275;
+        end if;
+	end $$
+delimiter ;
+
 
 select func.nome "Funcionário", 
 	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
@@ -556,6 +573,7 @@ select func.nome "Funcionário",
     concat("R$ ", format(valeAlimentacao(func.cargaHoraria), 2, 'de_DE')) "Vale Alimentação",
 	concat("R$ ", format(valeSaude(func.dataNasc), 2, 'de_DE')) "Auxílio Saúde",
     concat("R$ ", format(coalesce(auxCreche(func.cpf), 0), 2, 'de_DE')) "Auxílio Creche",
+    concat("- R$ ", format(calcINSS(func.salario) , 2, 'de_DE')) "INSS",
     concat("- R$ ", format(calcINSS(func.salario) , 2, 'de_DE')) "INSS",
 	"Salário Líquido"
 	from funcionario func	
