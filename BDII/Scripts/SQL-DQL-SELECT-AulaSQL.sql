@@ -608,9 +608,25 @@ create view vRelPagSalaria as
 -- Funcionario, CPF, Data de Início, Data de Fim, Quantidade de Dias, Valor (função)
 -- Ano de Referência
 -- Calculo --> (Salario * 0.33) * qtdDias/30
+delimiter $$
+create function valorFerias(salario decimal(7,2), qtdDias int)
+	returns decimal(6,2) deterministic
+    begin
+		return (salario * 0.33) * qtdDias / 30;
+    end $$
+delimiter ;
 
-
-
+select func.nome "Funcionário", func.cpf "CPF", 
+	date_format(fer.dataInicio, '%d/%m/%Y') "Data de Início",
+    date_format(date_add(fer.dataInicio, interval fer.qtdDias day), '%d/%m/%Y') "Data de Início",
+    fer.qtdDias "Quantidade de Dias", 
+    concat("R$ ", format(valorFerias(func.salario, fer.qtdDias), 2, 'de_DE')) "Valor a Receber",
+    concat("R$ ", format(fer.valor, 2, 'de_DE')) "Valor ChatGPT",
+    fer.anoRef "Ano Referência"
+    from ferias fer
+	inner join funcionario func on func.cpf = fer.Funcionario_CPF
+		order by anoRef desc, fer.dataInicio desc;
+    
 
 
 
