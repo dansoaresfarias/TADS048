@@ -526,6 +526,8 @@ create function auxCreche(cpfFunc varchar(14))
 				where Funcionario_CPF = cpfFunc
 					and timestampdiff(year, dataNasc, now()) < 7
 					group by Funcionario_CPF;
+		if qtdFilhos is null then set qtdFilhos = 0;
+			end if;
 		return qtdFilhos * 180;
     end $$
 delimiter ;
@@ -554,7 +556,7 @@ create function calcIRRF(salario decimal(7,2))
 		if(salario <= 2259.20) 
 			then return 0;
 		elseif(salario between 2259.20 and 2826.65)
-			then return salario * 0.75;
+			then return salario * 0.075;
 		elseif(salario between 2826.65 and 3751.05)
 			then return salario * 0.15;
 		elseif(salario between 3751.05 and 4664.68)
@@ -564,7 +566,6 @@ create function calcIRRF(salario decimal(7,2))
 	end $$
 delimiter ;
 
-
 select func.nome "Funcionário", 
 	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
     concat(func.cargaHoraria, 'h') "Carga Horária",
@@ -572,14 +573,49 @@ select func.nome "Funcionário",
     concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
     concat("R$ ", format(valeAlimentacao(func.cargaHoraria), 2, 'de_DE')) "Vale Alimentação",
 	concat("R$ ", format(valeSaude(func.dataNasc), 2, 'de_DE')) "Auxílio Saúde",
-    concat("R$ ", format(coalesce(auxCreche(func.cpf), 0), 2, 'de_DE')) "Auxílio Creche",
+    concat("R$ ", format(auxCreche(func.cpf), 2, 'de_DE')) "Auxílio Creche",
     concat("- R$ ", format(calcINSS(func.salario) , 2, 'de_DE')) "INSS",
-    concat("- R$ ", format(calcINSS(func.salario) , 2, 'de_DE')) "INSS",
-	"Salário Líquido"
-	from funcionario func	
+    concat("- R$ ", format(calcIRRF(func.salario) , 2, 'de_DE')) "IRRF",
+	concat("R$ ", format(func.salario + valeAlimentacao(func.cargaHoraria) 
+		+ valeSaude(func.dataNasc) + auxCreche(func.cpf) 
+        - calcINSS(func.salario) - calcIRRF(func.salario) , 2, 'de_DE')) "Salário Líquido"
+	from funcionario func
 		inner join trabalhar trb on trb.Funcionario_CPF = func.cpf
 		inner join cargo crg on crg.CBO = trb.Cargo_CBO
-			order by func.nome;
+			where trb.dataFim is null
+				order by func.nome;
+
+create view vRelPagSalaria as
+	select func.nome "Funcionário", 
+		replace(replace(func.cpf, '.', ''), '-', '') "CPF",
+		concat(func.cargaHoraria, 'h') "Carga Horária",
+		crg.nome "Cargo",  
+		concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
+		concat("R$ ", format(valeAlimentacao(func.cargaHoraria), 2, 'de_DE')) "Vale Alimentação",
+		concat("R$ ", format(valeSaude(func.dataNasc), 2, 'de_DE')) "Auxílio Saúde",
+		concat("R$ ", format(auxCreche(func.cpf), 2, 'de_DE')) "Auxílio Creche",
+		concat("- R$ ", format(calcINSS(func.salario) , 2, 'de_DE')) "INSS",
+		concat("- R$ ", format(calcIRRF(func.salario) , 2, 'de_DE')) "IRRF",
+		concat("R$ ", format(func.salario + valeAlimentacao(func.cargaHoraria) 
+			+ valeSaude(func.dataNasc) + auxCreche(func.cpf) 
+			- calcINSS(func.salario) - calcIRRF(func.salario) , 2, 'de_DE')) "Salário Líquido"
+		from funcionario func
+			inner join trabalhar trb on trb.Funcionario_CPF = func.cpf
+			inner join cargo crg on crg.CBO = trb.Cargo_CBO
+				where trb.dataFim is null
+					order by func.nome;
+
+-- Funcionario, CPF, Data de Início, Data de Fim, Quantidade de Dias, Valor (função)
+-- Ano de Referência
+-- Calculo --> (Salario * 0.33) * qtdDias/30
+
+
+
+
+
+
+
+
 
 
 
