@@ -530,14 +530,34 @@ create function auxCreche(cpfFunc varchar(14))
     end $$
 delimiter ;
 
+delimiter $$
+create function calcINSS(salario decimal(7,2))
+	returns decimal(6,2) deterministic
+    begin
+		if(salario <= 1518) 
+			then return salario * 0.075;
+		elseif(salario between 1518 and 2793.88)
+			then return salario * 0.09;
+		elseif(salario between 2793.88 and 4190.83)
+			then return salario * 0.12;
+		elseif(salario between 4190.83 and 8157.41)
+			then return salario * 0.14;
+		else return 8157.41 * 0.14;
+        end if;
+    end $$
+delimiter ;
+
+
 select func.nome "Funcionário", 
 	replace(replace(func.cpf, '.', ''), '-', '') "CPF",
     concat(func.cargaHoraria, 'h') "Carga Horária",
     crg.nome "Cargo",  
+    concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário",
     concat("R$ ", format(valeAlimentacao(func.cargaHoraria), 2, 'de_DE')) "Vale Alimentação",
 	concat("R$ ", format(valeSaude(func.dataNasc), 2, 'de_DE')) "Auxílio Saúde",
     concat("R$ ", format(coalesce(auxCreche(func.cpf), 0), 2, 'de_DE')) "Auxílio Creche",
-	concat("R$ ", format(func.salario, 2, 'de_DE')) "Salário"
+    concat("- R$ ", format(calcINSS(func.salario) , 2, 'de_DE')) "INSS",
+	"Salário Líquido"
 	from funcionario func	
 		inner join trabalhar trb on trb.Funcionario_CPF = func.cpf
 		inner join cargo crg on crg.CBO = trb.Cargo_CBO
