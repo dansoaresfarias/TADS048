@@ -680,6 +680,65 @@ select distinct Funcionario_CPF "CPF Funcionário",
 	calcHorasFuncDia(funcionario_cpf, date_format(dataHora, '%Y-%m-%d'))
     from registroponto;
 
+-- PL SQL Procedure
+-- Cadastro Funcionario
+delimiter $$
+create procedure cadFuncionario(in pCPF varchar(14),
+								in pnome varchar(60) ,
+								in pnomeSocial varchar(45) ,
+								in pdataNasc date ,
+								in pgenero varchar(25) ,
+								in pestadoCivil varchar(25) ,
+								in pemail varchar(80) ,
+								in pcarteiraTrab varchar(45) ,
+								in pcargaHoraria int,
+								in psalario decimal(7,2),
+								in pchavePIX varchar(45) ,
+								in pstatus tinyint ,
+								in pfg decimal(6,2),
+                                in pUF char(2),
+								in pcidade varchar(45),
+								in pbairro varchar(45),
+								in prua varchar(45),
+								in pnumero int,
+								in pcomp varchar(45),
+								in pcep varchar(9),
+                                in ptelefone1 varchar(14),
+                                in ptelefone2 varchar(14),
+                                in ptelefone3 varchar(14))
+	begin
+		insert into funcionario
+			value (pCPF, pnome, pnomeSocial, pdataNasc, pgenero, 
+				pestadoCivil, pemail, pcarteiraTrab, pcargaHoraria, psalario, 
+                pchavePIX, pstatus, pfg);
+		insert into endereco
+			value (pCPF, pUF, pcidade, pbairro, prua, pnumero, pcomp, pcep);
+		insert into telefone (numero, Funcionario_CPF)
+			value (ptelefone1, pCPF);
+		if (ptelefone2 is not null) then 
+			insert into telefone (numero, Funcionario_CPF)
+				value (ptelefone2, pCPF);
+		end if;
+		if (ptelefone3 is not null) then 
+			insert into telefone (numero, Funcionario_CPF)
+				value (ptelefone3, pCPF);
+		end if;
+    end $$
+delimiter ;
+
+desc telefone;
+
+call cadFuncionario("141.507.705-41", "Hugo Pires", null, '2005-05-16', 
+	"Masculino", "Solteiro", "hugo.pires@gmail.com", "678141-57", 36, 2000,
+    "141.507.705-41", 1, 200, "PE", "Recife", "Macaxeira", "Rua Dom Bosco",
+	145, null, "50765-080", "8199576-7676", "81997659-9595", null);
+    
+select * from funcionario order by nome;
+
+select * from endereco;
+
+select * from telefone;
+
 
 
 
