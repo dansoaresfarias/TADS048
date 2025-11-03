@@ -626,12 +626,59 @@ select func.nome "Funcionário", func.cpf "CPF",
     from ferias fer
 	inner join funcionario func on func.cpf = fer.Funcionario_CPF
 		order by anoRef desc, fer.dataInicio desc;
-    
 
+select dataHora
+	from registroPonto 
+		where Funcionario_CPF = "014.140.410-44" and
+			date_format(dataHora, '%Y-%m-%d') = '2025-01-01'
+				order by dataHora
+					limit 1;
 
+delimiter $$
+create function calcHorasFuncDia(cpf varchar(14), dataDia date)
+	returns int deterministic
+	begin
+		declare horasTrab, horasAntAlm, horasPosAlm int default 0;
+        declare entrada, saidaAlm, entradaPosAlm, largada datetime;
+        select dataHora into entrada 
+			from registroPonto 
+				where Funcionario_CPF = cpf and
+					date_format(dataHora, '%Y-%m-%d') = dataDia
+						order by dataHora
+							limit 1;
+		select dataHora into entradaPosAlm 
+			from registroPonto 
+				where Funcionario_CPF = cpf and
+					date_format(dataHora, '%Y-%m-%d') = dataDia and
+                    tipoES = "Entrada"                    
+						order by dataHora desc
+							limit 1;
+         select dataHora into saidaAlm 
+			from registroPonto 
+				where Funcionario_CPF = cpf and
+					date_format(dataHora, '%Y-%m-%d') = dataDia and
+                    tipoES = "Saída" and
+                    justificativa is not null
+						limit 1;
+		select dataHora into largada 
+			from registroPonto 
+				where Funcionario_CPF = cpf and
+					date_format(dataHora, '%Y-%m-%d') = dataDia and
+                    tipoES = "Saída" and
+                    justificativa is null
+						limit 1;
+		select timestampdiff(hour, entrada, saidaAlm) into horasAntAlm;
+        select timestampdiff(hour, entradaPosAlm, largada) into horasPosAlm;
+        set horasTrab = horasAntAlm + horasPosAlm;
+        return horasTrab;
+    end $$
+delimiter ;
 
+select calcHorasFuncDia("014.140.410-44",'2025-01-02');
 
-
+select distinct Funcionario_CPF "CPF Funcionário", 
+	calcHorasFuncDia(funcionario_cpf, date_format(dataHora, '%Y-%m-%d'))
+    from registroponto;
 
 
 
