@@ -760,11 +760,54 @@ insert into UH_Reserva
 	values (40, 302), (41, 303), (42, 304), (43, 305), (44, 306), (45, 307);
 	
 -- Proceduro de Check-In FODAAAAAA!!!
+delimiter $$
+create procedure realizarCheckIn(in pIdReserva int,
+						in pdocIdentificacao varchar(25),
+						in pnome varchar(45),
+						in pgenero varchar(25),
+						in pdataNasc date,
+						in ptelefone varchar(15),
+						in pemail varchar(45),
+                        in pResponsavel_docIdentificacao varchar(25))
+	begin
+		declare ResponsavelReserva varchar(25);
+        declare checagemHospedagem int default 0;
+        
+        insert into hospede
+			value(pdocIdentificacao, pnome, pgenero, pdataNasc, ptelefone,
+            pemail, pResponsavel_docIdentificacao);
+		
+        select Reserva_idReserva into checagemHospedagem 
+			from hospedagem 
+				where Reserva_idReserva = pIdReserva;
+		
+        update reserva
+			set `status` = "Check-In"
+				where Reserva_idReserva = pIdReserva;
+        
+		if(checagemHospedagem = 0) 
+			then insert into hospedagem
+					value (pIdReserva, NOW(), null, 0.0);
+		end if;
+		
+        insert into hospedar
+			value (pIdReserva, pdocIdentificacao);
+            
+		select Responsavel_docIdentificacao into ResponsavelReserva
+			from reserva
+				where idReserva = pIdReserva;
+		
+        if(checagemHospedagem = 0) 
+			then insert into hospedar
+					value (pIdReserva, ResponsavelReserva);
+        end if;
+	end $$
+delimiter ;
 
+call realizarCheckIn(302, "084.840.480-84", "Lucas Querubim", "Masculino",
+	'1996-10-11', "81996523003", "lucas.desenrolado@gmail.com", null);
 
-
-
-
+delete from hospede where docIdentificacao = "084.840.480-84";
 
 
 
