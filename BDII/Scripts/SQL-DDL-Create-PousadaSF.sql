@@ -433,6 +433,187 @@ CREATE TABLE IF NOT EXISTS `PousaSaoFrancisco`.`FormaPag` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+-- PL SQL Function
+-- Calcular o Vale Alimentação
+DELIMITER $$
+create function valeAlimentacao(ch int)
+	returns decimal(6,2) deterministic
+    begin
+		if ch >= 40 
+			then return 22*20;
+        else 
+			return 22*32;
+        end if;
+    end $$
+DELIMITER ;
+
+delimiter $$
+create function valeSaude(dn date)
+	returns decimal(6,2) deterministic
+    begin
+		declare idade int;
+		select timestampdiff(year, dn, now()) into idade;
+        if(idade <= 25) 
+			then return 180;
+		elseif(idade between 25 and 35)
+			then return 280;
+		elseif(idade between 35 and 45)
+			then return 380;
+		elseif(idade between 45 and 55)
+			then return 480;
+		else 
+			return 600;
+        end if;
+    end $$
+delimiter ;
+
+delimiter $$
+create function auxCreche(cpfFunc varchar(14))
+	returns decimal(6,2) deterministic
+    begin
+		declare qtdFilhos int;
+        select count(cpf) into qtdFilhos
+			from dependente 
+				where Funcionario_CPF = cpfFunc
+					and timestampdiff(year, dataNasc, now()) < 7
+					group by Funcionario_CPF;
+		if qtdFilhos is null then set qtdFilhos = 0;
+			end if;
+		return qtdFilhos * 180;
+    end $$
+delimiter ;
+
+delimiter $$
+create function calcINSS(salario decimal(7,2))
+	returns decimal(6,2) deterministic
+    begin
+		if(salario <= 1518) 
+			then return salario * 0.075;
+		elseif(salario between 1518 and 2793.88)
+			then return salario * 0.09;
+		elseif(salario between 2793.88 and 4190.83)
+			then return salario * 0.12;
+		elseif(salario between 4190.83 and 8157.41)
+			then return salario * 0.14;
+		else return 8157.41 * 0.14;
+        end if;
+    end $$
+delimiter ;
+
+delimiter $$
+create function calcIRRF(salario decimal(7,2))
+	returns decimal(6,2) deterministic
+    begin
+		if(salario <= 2259.20) 
+			then return 0;
+		elseif(salario between 2259.20 and 2826.65)
+			then return salario * 0.075;
+		elseif(salario between 2826.65 and 3751.05)
+			then return salario * 0.15;
+		elseif(salario between 3751.05 and 4664.68)
+			then return salario * 0.225;
+		else return salario * 0.275;
+        end if;
+	end $$
+delimiter ;
+
+-- Funcionario, CPF, Data de Início, Data de Fim, Quantidade de Dias, Valor (função)
+-- Ano de Referência
+-- Calculo --> (Salario * 0.33) * qtdDias/30
+delimiter $$
+create function valorFerias(salario decimal(7,2), qtdDias int)
+	returns decimal(6,2) deterministic
+    begin
+		return (salario * 0.33) * qtdDias / 30;
+    end $$
+delimiter ;
+
+delimiter $$
+create function calcHorasFuncDia(cpf varchar(14), dataDia date)
+	returns int deterministic
+	begin
+		declare horasTrab, horasAntAlm, horasPosAlm int default 0;
+        declare entrada, saidaAlm, entradaPosAlm, largada datetime;
+        select dataHora into entrada 
+			from registroPonto 
+				where Funcionario_CPF = cpf and
+					date_format(dataHora, '%Y-%m-%d') = dataDia
+						order by dataHora
+							limit 1;
+		select dataHora into entradaPosAlm 
+			from registroPonto 
+				where Funcionario_CPF = cpf and
+					date_format(dataHora, '%Y-%m-%d') = dataDia and
+                    tipoES = "Entrada"                    
+						order by dataHora desc
+							limit 1;
+         select dataHora into saidaAlm 
+			from registroPonto 
+				where Funcionario_CPF = cpf and
+					date_format(dataHora, '%Y-%m-%d') = dataDia and
+                    tipoES = "Saída" and
+                    justificativa is not null
+						limit 1;
+		select dataHora into largada 
+			from registroPonto 
+				where Funcionario_CPF = cpf and
+					date_format(dataHora, '%Y-%m-%d') = dataDia and
+                    tipoES = "Saída" and
+                    justificativa is null
+						limit 1;
+		select timestampdiff(hour, entrada, saidaAlm) into horasAntAlm;
+        select timestampdiff(hour, entradaPosAlm, largada) into horasPosAlm;
+        set horasTrab = horasAntAlm + horasPosAlm;
+        return horasTrab;
+    end $$
+delimiter ;
+
+-- PL SQL Procedure
+-- Cadastro Funcionario
+delimiter $$
+create procedure cadFuncionario(in pCPF varchar(14),
+								in pnome varchar(60) ,
+								in pnomeSocial varchar(45) ,
+								in pdataNasc date ,
+								in pgenero varchar(25) ,
+								in pestadoCivil varchar(25) ,
+								in pemail varchar(80) ,
+								in pcarteiraTrab varchar(45) ,
+								in pcargaHoraria int,
+								in psalario decimal(7,2),
+								in pchavePIX varchar(45) ,
+								in pstatus tinyint ,
+								in pfg decimal(6,2),
+                                in pUF char(2),
+								in pcidade varchar(45),
+								in pbairro varchar(45),
+								in prua varchar(45),
+								in pnumero int,
+								in pcomp varchar(45),
+								in pcep varchar(9),
+                                in ptelefone1 varchar(14),
+                                in ptelefone2 varchar(14),
+                                in ptelefone3 varchar(14))
+	begin
+		insert into funcionario
+			value (pCPF, pnome, pnomeSocial, pdataNasc, pgenero, 
+				pestadoCivil, pemail, pcarteiraTrab, pcargaHoraria, psalario, 
+                pchavePIX, pstatus, pfg);
+		insert into endereco
+			value (pCPF, pUF, pcidade, pbairro, prua, pnumero, pcomp, pcep);
+		insert into telefone (numero, Funcionario_CPF)
+			value (ptelefone1, pCPF);
+		if (ptelefone2 is not null) then 
+			insert into telefone (numero, Funcionario_CPF)
+				value (ptelefone2, pCPF);
+		end if;
+		if (ptelefone3 is not null) then 
+			insert into telefone (numero, Funcionario_CPF)
+				value (ptelefone3, pCPF);
+		end if;
+    end $$
+delimiter ;
+
 -- -----------------------------------------------------
 -- 1. Remova o Procedure antigo, se ele existir
 -- -----------------------------------------------------
@@ -576,7 +757,6 @@ END$$
 -- 4. Retorne o delimitador ao padrão
 -- -----------------------------------------------------
 DELIMITER ;
-
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
