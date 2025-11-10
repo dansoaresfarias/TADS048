@@ -783,7 +783,7 @@ create procedure realizarCheckIn(in pIdReserva int,
 		
         update reserva
 			set `status` = "Check-In"
-				where Reserva_idReserva = pIdReserva;
+				where idReserva = pIdReserva;
         
 		if(checagemHospedagem = 0) 
 			then insert into hospedagem
@@ -809,10 +809,31 @@ call realizarCheckIn(302, "084.840.480-84", "Lucas Querubim", "Masculino",
 
 delete from hospede where docIdentificacao = "084.840.480-84";
 
+call realizarCheckIn(302, "801.108.810-81", "Renata Gusmão", "Feminino",
+	'1995-12-16', "81996521234", "renata.desenrolada@gmail.com", null);
+    
+call realizarCheckIn(302, "156.651.561-51", "André Matias", "Masculino",
+	'2019-07-27', "81996529652", "andre.desenrolado@gmail.com", "801.108.810-81");
 
+delimiter $$
+create trigger trg_aft_insert_itenshospedagem after insert
+	on itenshospedagem
+    for each row
+    begin
+		update produto
+			set quantidade = quantidade - new.qtd
+				where idProduto = new.Produto_idProduto;
+		update hospedagem
+			set valorTotal = valorTotal + new.qtd * new.valorUnd
+				where Reserva_idReserva = new.Hospedagem_Reserva_idReserva;
+    end $$
+delimiter ;
 
+drop trigger trg_aft_insert_itenshospedagem;
 
-
-
+insert into itenshospedagem
+	values (302, 2, 3, 5),
+			(302, 3, 5, 6.5),
+            (302, 6, 10, 12);
 
 
