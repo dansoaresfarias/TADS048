@@ -1045,6 +1045,6 @@ INSERT INTO `PousaSaoFrancisco`.`Hospede` (`docIdentificacao`, `nome`, `genero`,
 ('70.707.070-7 CE', 'Pelé', 'Masculino', '1940-10-23', '85900990011', 'pele@email.com', NULL),
 ('80.808.080-8 SC', 'Quincy Jones', 'Masculino', '1933-03-14', '48999001122', 'quincy.jones@email.com', NULL);
 
-CALL sp_gerar_hospedagem_completa(1000);
+CALL sp_gerar_hospedagem_completa(100);
 
 

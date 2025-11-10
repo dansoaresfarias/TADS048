@@ -739,7 +739,21 @@ select * from endereco;
 
 select * from telefone;
 
+select * from hospede order by nome;
 
-
-
+insert into reserva (dataInicio, dataFim, qtdPessoas, `status`, Funcionario_CPF,
+	Responsavel_docIdentificacao)
+	values ('2025-11-10', '2025-11-14', 2, 'Confirmada', "134.411.311-44",
+			"77.666.777-6 CE"),
+            ('2025-11-10', '2025-11-14', 2, 'Confirmada', "108.801.888-11",
+			"88.777.888-7 SC"),
+            ('2025-11-10', '2025-11-14', 3, 'Confirmada', "134.411.311-44",
+			"44.333.444-3 RJ"),
+            ('2025-11-12', '2025-11-16', 2, 'Confirmada', "108.801.888-11",
+			"PAS-CA123123"),
+            ('2025-11-12', '2025-11-16', 4, 'Confirmada', "108.801.888-11",
+			"PAS-CN654987"),
+            ('2025-11-12', '2025-11-16', 6, 'Confirmada', "108.801.888-11",
+			"40.404.040-4 RJ");
+	
 
