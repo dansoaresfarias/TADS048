@@ -755,5 +755,21 @@ insert into reserva (dataInicio, dataFim, qtdPessoas, `status`, Funcionario_CPF,
 			"PAS-CN654987"),
             ('2025-11-12', '2025-11-16', 6, 'Confirmada', "108.801.888-11",
 			"40.404.040-4 RJ");
+            
+insert into UH_Reserva
+	values (40, 302), (41, 303), (42, 304), (43, 305), (44, 306), (45, 307);
 	
+-- Proceduro de Check-In FODAAAAAA!!!
+
+
+
+
+
+
+
+
+
+
+
+
 
