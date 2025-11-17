@@ -836,4 +836,88 @@ insert into itenshospedagem
 			(302, 3, 5, 6.5),
             (302, 6, 10, 12);
 
+insert into itenshospedagem
+	values (302, 1, 2, 4.5),
+			(302, 4, 3, 6.5),
+            (302, 7, 8, 11);
+
+delimiter $$
+create trigger trg_bfr_insert_itenshospedagem before insert
+	on itenshospedagem
+    for each row
+    begin
+		declare auxQtdProduto int;
+        declare auxNomeProd varchar(45);
+        declare msg varchar(255);
+		select quantidade into auxQtdProduto
+			from produto
+				where idProduto = new.Produto_idProduto;		
+		if(new.qtd > auxQtdProduto) then 
+			select nome into auxNomeProd
+			from produto
+				where idProduto = new.Produto_idProduto;
+			select concat('Quantidade insuficiente para o consumo do produto - ', auxNomeProd) into msg;
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
+		end if;
+    end $$
+delimiter ;
+
+drop trigger trg_bfr_insert_itenshospedagem;
+
+insert into itenshospedagem
+	values (302, 10, 2, 8),
+			(302, 12, 5, 14),
+            (302, 23, 80, 50);
+
+delimiter $$
+create trigger trg_aft_delete_itenshospedagem after delete
+	on itenshospedagem
+    for each row
+    begin
+		update produto
+			set quantidade = quantidade + old.qtd
+				where idProduto = old.Produto_idProduto;
+		update hospedagem
+			set valorTotal = valorTotal - old.qtd * old.valorUnd
+				where Reserva_idReserva = old.Hospedagem_Reserva_idReserva;
+    end $$
+delimiter ;
+
+delete from itenshospedagem
+	where Hospedagem_Reserva_idReserva = 302 and
+		Produto_idProduto = 8;
+
+delimiter $$
+create trigger trg_aft_update_itenshospedagem after update
+	on itenshospedagem
+    for each row
+    begin
+		if(old.qtd > new.qtd) then 
+			update produto
+				set quantidade = quantidade + (old.qtd - new.qtd)
+					where idProduto = old.Produto_idProduto;
+			update hospedagem
+				set valorTotal = valorTotal - (old.qtd - new.qtd) * old.valorUnd
+					where Reserva_idReserva = old.Hospedagem_Reserva_idReserva;
+        else
+			update produto
+			set quantidade = quantidade - (new.qtd - old.qtd)
+				where idProduto = new.Produto_idProduto;
+			update hospedagem
+				set valorTotal = valorTotal + (new.qtd - old.qtd) * new.valorUnd
+					where Reserva_idReserva = new.Hospedagem_Reserva_idReserva;
+		end if;
+    end $$
+delimiter ;
+
+update itenshospedagem
+	set qtd = 12
+		where Hospedagem_Reserva_idReserva = 302
+			and Produto_idProduto = 1;
+
+update itenshospedagem
+	set qtd = 5
+		where Hospedagem_Reserva_idReserva = 302
+			and Produto_idProduto = 7;
+
 
